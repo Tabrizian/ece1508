@@ -47,6 +47,8 @@ function create_network {
 	name=$1
 	public=$2
 	ip_range=$3
+	ip_range_start=$4
+	ip_range_end=$5
 	header="X-AUTH-Token:$OS_TOKEN"
 	data="{ \
 		\"network\": { \
@@ -61,6 +63,9 @@ function create_network {
 		\"enable_dhcp\": true, \
 		\"network_id\": \"$network_id\", \
 		\"ip_version\": 4, \
+		\"allocation_pools\": [{ \
+		\"start\": \"$ip_range_start\",\
+		\"end\": \"$ip_range_end\"}],
 		\"cidr\": \"$ip_range\" }}"
 	subnet_id=`curl -s -H "$header" -d "$data" "http://$OS_NETWORK_API/v2.0/subnets" | jq '.subnet.id'`
 	subnet_id=`remove_quotes $subnet_id`
@@ -80,7 +85,8 @@ function create_server {
 		\"imageRef\": \"$image\",\
 		\"networks\": [{\
 		\"uuid\": \"$network\"}]}}"
-	curl -s -H $content_type -H "$header" -d "$data" "http://$ENDPOINT_URL/compute/v2.1/servers"
+	server=`curl -s -H $content_type -H "$header" -d "$data" "http://$ENDPOINT_URL/compute/v2.1/servers" | jq '.server.id'`
+	remove_quotes $server
 }
 
 function get_image_id {
@@ -99,9 +105,17 @@ function get_flavor_id {
 
 function create_router {
 	name=$1
+	subnet_id=$2
+	network_id=$3
 	header="X-AUTH-Token:$OS_TOKEN"
 	data="{ \"router\": { \
 		\"name\": \"$name\", \
+		\"external_gateway_info\":{ \
+		\"network_id\": \"$network_id\", \
+		\"enable_snat\": true, \
+		\"external_fixed_ips\": [{\
+		\"ip_address\": \"172.24.4.6\",\
+		\"subnet_id\": \"$subnet_id\"}]},\
 		\"admin_state_up\": true }}"
 	router=`curl -s -H "$header" -d "$data" "http://$OS_NETWORK_API/v2.0/routers" | jq '.router.id'`
 	remove_quotes $router
@@ -116,27 +130,47 @@ function add_interface_to_router {
 	curl -X PUT -s -H "$header" -d "$data" "http://$OS_NETWORK_API/v2.0/routers/$1/add_router_interface"
 }
 
+function get_port_id {
+	server=$1
+	header="X-AUTH-Token:$OS_TOKEN"
+	port_id=`curl -s -H "$header" "http://$ENDPOINT_URL/compute/v2.1/servers/$server/os-interface" | jq '.interfaceAttachments[0].port_id'`
+	remove_quotes $port_id
+}
+
+function create_floating_ip {
+	port=$1
+	subnet=$2
+	network=$3
+	header="X-AUTH-Token:$OS_TOKEN"
+	data="{\
+		\"floatingip\": { \
+		\"floating_network_id\": \"$network\",\
+		\"port_id\": \"$port\",\
+		\"subnet_id\": \"$subnet\"}}"
+	curl -X POST -s -H "$header" -d "$data" "http://$OS_NETWORK_API/v2.0/floatingips"
+}
+
 export ENDPOINT_URL=$1
 
 load_creds
 auth 
-red=`create_network blue false "10.0.0.0/24"`
+red=`create_network blue false "10.0.0.0/24" "10.0.0.7" "10.0.0.254"` 
 red=($red)
 echo "Blue network created"
-blue=`create_network red false "192.168.1.0/24"`
+blue=`create_network red false "192.168.1.0/24" "192.168.1.7" "192.168.1.254"`
 blue=($blue)
 echo "Red network created"
-public=`create_network public true "172.24.4.0/24"`
+public=`create_network public true "172.24.4.0/24" "172.24.4.7" "172.24.4.254"`
 public=($public)
 echo "Public network created"
-router=`create_router router`
+router=`create_router router ${public[0]} ${public[1]}`
 echo "Router was created"
 interface1=`add_interface_to_router $router ${red[0]}`
 echo "Interface ${red[0]} was added to router"
 interface2=`add_interface_to_router $router ${blue[0]}`
 echo "Interface ${blue[0]} was added to router"
-interface3=`add_interface_to_router $router ${public[0]}`
-echo "Interface ${public[0]} was added to router"
+# interface3=`add_interface_to_router $router ${public[0]}`
+# echo "Interface ${public[0]} was added to router"
 image_id=`get_image_id "cirros-0.3.5-x86_64-disk"`
 flavor_id=`get_flavor_id "m1.nano"`
 vm1=`create_server "vm1" $flavor_id $image_id ${blue[1]}`
@@ -146,4 +180,10 @@ echo "VM2 created"
 vm3=`create_server "vm3" $flavor_id $image_id ${public[1]}`
 echo "VM3 created"
 
+vm1_port_id=`get_port_id "$vm1"`
+vm2_port_id=`get_port_id "$vm2"`
 
+vm1_floating_ip=`create_floating_ip $vm1_port_id ${public[0]} ${public[1]}`
+echo "Floating ip for vm1 was assigned"
+vm2_floating_ip=`create_floating_ip $vm2_port_id ${public[0]} ${public[1]}`
+echo "Floating ip for vm2 was assigned"
