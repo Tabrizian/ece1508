@@ -13,7 +13,7 @@ function remove_quotes {
 	string=$1
 	temp="${string%\"}"
 	temp="${temp#\"}"
-	echo $temp
+	echo "$temp"
 }
 
 function auth {
@@ -40,7 +40,15 @@ function auth {
 
 function list_servers {
 	header="X-AUTH-Token:$OS_TOKEN"
-	curl -s -H "$header" "http://$ENDPOINT_URL/compute/v2.1/servers" | jq '[.servers[] | {id: .id, name: .name}]'
+	servers=`curl -s -H "$header" "http://$ENDPOINT_URL/compute/v2.1/servers" | jq '[.servers[].id] | join(" ")'`
+	servers=`remove_quotes "$servers"`
+	servers_json=`echo "[]"`
+	for server in $servers; do
+		server=`curl -s -H "$header" "http://$ENDPOINT_URL/compute/v2.1/servers/$server" | jq -c '[.server | {id: .id, name: .name, status: .status}]'`
+		servers_json=`echo $servers_json | jq '. += '"$server"`
+	done
+	echo $servers_json
+
 }
 
 function list_networks {
