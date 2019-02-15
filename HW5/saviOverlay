@@ -97,8 +97,7 @@ def runCommandOverSSH(sshSession, command):
         err = ''.join(err) # Convert to single string
         if err:
             logger.error("%s\n" % err)
-
-        # Check if command printed anything to stdout
+# Check if command printed anything to stdout
         out = stdout.readlines()
         out = ''.join(out) # Convert to single string
         if out:
@@ -167,6 +166,18 @@ def setController(switchVMObj, ctrlEndpoint):
     cmd = "sudo ovs-vsctl set-controller %s tcp:%s" % (ovsName, ctrlEndpoint)
     runCommandOverSSH(hostSSH, cmd)
 
+
+def getNovaClient():
+    nova = novaClient.Client(
+        overlay_config.username,
+        overlay_config.password,
+        overlay_config.tenant_name,
+        overlay_config.auth_url,
+        region_name=overlay_config.region,
+        no_cache=True
+        )
+    return nova
+
 ################################################################################
 # HELPER FUNCTIONS (TO BE COMPLETED BY STUDENTS)
 ################################################################################
@@ -187,28 +198,22 @@ def bootVM(vmName):
     logger.info("Creating VM %s" % vmName)
 
     # STUDENTS FILL THIS PART OUT
-    nova = novaClient.Client(
-        username=overlay_config.username,
-        password=overlay_config.password,
-        auth_url=overlay_config.auth_url,
-        tenant_id=overlay_config.tenant,
-        region_name=overlay_config.region,
-        no_cache=True
-        )
-    net_name = overlay_config.tenant + '-net'
+    nova = getNovaClient()
+    net_name = overlay_config.tenant_name + '-net'
     net = nova.networks.find(label=net_name)
+    flavor = nova.flavors.find(name=overlay_config.flavor)
+    image = nova.images.find(name=overlay_config.image)
     server = nova.servers.create(
         vmName,
-        overlay_config.image,
-        overlay_config.flavor,
-        overlay_config.key_name,
-        security_group=['default'],
+        image,
+        flavor,
+        key_name=overlay_config.key_name,
+        security_groups=[overlay_config.username],
         nics=[{'net-id': net.id}]
         )
 
-    while vm.status != 'ACTIVE':
-        time.sleep(3)
-        vm.get()
+    waitUntilVMActive(server)
+
     return server
 
 
@@ -233,6 +238,10 @@ def setOverlayInterface(hostVMObj, hostOverlayIP):
     waitUntilOVSActive(hostSSH)
 
     # STUDENTS FILL THIS PART OUT
+    runCommandOverSSH(hostSSH, 'sudo ovs-vsctl --may-exist add-br br1')
+    runCommandOverSSH(hostSSH, 'sudo ovs-vsctl --may-exist add-port br1 br1-internal -- set interface br1-internal type=internal')
+    runCommandOverSSH(hostSSH, 'sudo ifconfig br1-internal %s/24 mtu 1450 up' % hostOverlayIP)
+
 
 
 # Connects two nodes as part of an overlay.
@@ -257,6 +266,9 @@ def connectNodes(node1, node2):
     waitUntilOVSActive(node2SSH)
 
     # STUDENTS FILL THIS PART OUT
+    runCommandOverSSH(node1SSH, 'sudo ovs-vsctl add-port br1 vxlan1 -- set interface vxlan1 type=vxlan options:remote_ip=%s options:key=%s' % (node2IP, "1000"))
+    runCommandOverSSH(node2SSH, 'sudo ovs-vsctl add-port br1 vxlan1 -- set interface vxlan1 type=vxlan options:remote_ip=%s options:key=%s' % (node1IP, "1000"))
+
 
 
 ################################################################################
@@ -300,6 +312,11 @@ def cleanupOverlay():
     print "In cleanupOverlay()"
 
     # STUDENTS FILL THIS PART OUT
+    nova = getNovaClient()
+    for server in nova.servers.list():
+        if server.name.split('-')[0] == overlay_config.username:
+            print server.name + ' deleted!'
+            server.delete()
 
 
 def printHelp():
@@ -311,7 +328,7 @@ def printHelp():
     return
 
 if __name__ == "__main__":
-    SUBCOMMANDS = ('help', 'deploy', 'list', 'cleanup')
+    SUBCOMMANDS = ('help', 'deploy', 'list', 'cleanup', 'test')
 
     if len(sys.argv) > 2:
         print "ERROR: Incorrect # of args"
@@ -339,6 +356,13 @@ if __name__ == "__main__":
             listOverlay()
         elif sys.argv[1] == "cleanup":
             cleanupOverlay()
+        elif sys.argv[1] == "test":
+            vm1 = bootVM("salam")
+            vm2 = bootVM("salam2")
+            setOverlayInterface(vm1, "10.20.30.100")
+            setOverlayInterface(vm2, "10.20.30.101")
+            connectNodes(vm1, vm2)
+
 
     sys.exit();
 
