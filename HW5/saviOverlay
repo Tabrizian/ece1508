@@ -239,9 +239,17 @@ def setOverlayInterface(hostVMObj, hostOverlayIP):
 
     # STUDENTS FILL THIS PART OUT
     runCommandOverSSH(hostSSH, 'sudo ovs-vsctl --may-exist add-br br1')
-    runCommandOverSSH(hostSSH, 'sudo ovs-vsctl --may-exist add-port br1 br1-internal -- set interface br1-internal type=internal')
-    runCommandOverSSH(hostSSH, 'sudo ifconfig br1-internal %s/24 mtu 1450 up' % hostOverlayIP)
+    if hostOverlayIP is not None:
+        runCommandOverSSH(hostSSH, 'sudo ovs-vsctl --may-exist add-port br1 br1-internal -- set interface br1-internal type=internal')
+        runCommandOverSSH(hostSSH, 'sudo ifconfig br1-internal %s/24 mtu 1450 up' % hostOverlayIP)
 
+
+def getVMSession(vmObject):
+    networkName = overlay_config.tenant_name + '-net'
+
+    nodeIP = vmObject.networks.get(networkName)[0]
+    nodeSSH = getSSHSession(nodeIP, 'ubuntu', 'savi')
+    return nodeSSH
 
 
 # Connects two nodes as part of an overlay.
@@ -266,8 +274,16 @@ def connectNodes(node1, node2):
     waitUntilOVSActive(node2SSH)
 
     # STUDENTS FILL THIS PART OUT
-    runCommandOverSSH(node1SSH, 'sudo ovs-vsctl add-port br1 vxlan1 -- set interface vxlan1 type=vxlan options:remote_ip=%s options:key=%s' % (node2IP, "1000"))
-    runCommandOverSSH(node2SSH, 'sudo ovs-vsctl add-port br1 vxlan1 -- set interface vxlan1 type=vxlan options:remote_ip=%s options:key=%s' % (node1IP, "1000"))
+    vni = generateVNI()
+    runCommandOverSSH(node1SSH, 'sudo ovs-vsctl add-port br1 %s -- set interface %s type=vxlan options:remote_ip=%s options:key=%s' % (node1.name + '-' + node2.name, node1.name + '-' + node2.name, node2IP, vni))
+    runCommandOverSSH(node2SSH, 'sudo ovs-vsctl add-port br1 %s -- set interface %s type=vxlan options:remote_ip=%s options:key=%s' % (node2.name + '-' + node1.name, node2.name + '-' + node1.name, node1IP, vni))
+
+def getVM(vmName):
+    nova = getNovaClient()
+    vmName = overlay_config.username + '-' + vmName
+    server = nova.servers.find(name=vmName)
+    return server
+
 
 
 
@@ -286,8 +302,51 @@ def deployOverlay():
     # Dictionaries to map switch/host names to their Nova VM objects
     createdSwitches = {}
     createdHosts = {}
+    createdConnections = []
 
     # STUDENTS FILL THIS PART OUT
+    for switch in overlay_config.topology.keys():
+        switchVMObj = None
+
+        if switch in createdSwitches:
+            switchVMObj = createdSwitches[switch]
+        else:
+            switchVMObj = bootVM(switch)
+            createdSwitches[switch] = switchVMObj
+            setOverlayInterface(switchVMObj, None)
+
+        for endpoint in overlay_config.topology[switch]:
+            endpointVMObj = None
+            if type(endpoint) is str:
+                if endpoint + '-' + switch in createdConnections:
+                    continue
+                elif switch + '-' + endpoint in createdConnections:
+                    continue
+                else:
+                    createdConnections.append(switch + '-' + endpoint)
+
+                if endpoint in createdSwitches:
+                    endpointVMObj = createdSwitches[endpoint]
+                else:
+                   endpointVMObj = bootVM(endpoint)
+                   createdSwitches[endpoint] = endpointVMObj
+                   setOverlayInterface(endpointVMObj, None)
+
+            elif type(endpoint) is tuple:
+                if endpoint[0] + '-' + switch in createdConnections:
+                    continue
+                elif switch + '-' + endpoint[0] in createdConnections:
+                    continue
+                else:
+                    createdConnections.append(switch + '-' + endpoint[0])
+                if endpoint in createdHosts:
+                    endpointVMObj = createdHosts[endpoint[0]]
+                else:
+                   endpointVMObj = bootVM(endpoint[0])
+                   createdHosts[endpoint] = endpointVMObj
+                   setOverlayInterface(endpointVMObj, endpoint[1])
+
+            connectNodes(switchVMObj, endpointVMObj)
 
 
 # Lists any VM that starts with your username and a dash
@@ -357,11 +416,7 @@ if __name__ == "__main__":
         elif sys.argv[1] == "cleanup":
             cleanupOverlay()
         elif sys.argv[1] == "test":
-            vm1 = bootVM("salam")
-            vm2 = bootVM("salam2")
-            setOverlayInterface(vm1, "10.20.30.100")
-            setOverlayInterface(vm2, "10.20.30.101")
-            connectNodes(vm1, vm2)
+            print 'good'
 
 
     sys.exit();
