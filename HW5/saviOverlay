@@ -167,7 +167,7 @@ def setController(switchVMObj, ctrlEndpoint):
 
     ovsName = "%s-br" % switchVMObj.name
     cmd = "sudo ovs-vsctl set-controller %s tcp:%s" % (ovsName, ctrlEndpoint)
-    runCommandOverSSH(hostSSH, cmd)
+    runCommandOverSSH(switchSSH, cmd)
 
 
 def getNovaClient():
@@ -321,6 +321,7 @@ def deployOverlay():
             switchVMObj = bootVM(switch)
             createdSwitches[switch] = switchVMObj
             setOverlayInterface(switchVMObj, None)
+            setController(switchVMObj, overlay_config.contr_addr)
 
         for endpoint in overlay_config.topology[switch]:
             endpointVMObj = None
@@ -338,6 +339,7 @@ def deployOverlay():
                    endpointVMObj = bootVM(endpoint)
                    createdSwitches[endpoint] = endpointVMObj
                    setOverlayInterface(endpointVMObj, None)
+                   setController(endpointVMObj, overlay_config.contr_addr)
 
             elif type(endpoint) is tuple:
                 if endpoint[0] + '-' + switch in createdConnections:
