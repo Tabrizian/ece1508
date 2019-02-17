@@ -58,7 +58,7 @@ def getSSHSession(targetIP, username, password):
             sshSession.connect(targetIP, username=username, password=password)
             logger.debug("SSH to %s successful" % targetIP)
             break
-        except Exception s e:
+        except Exception:
             logger.debug("Waiting for SSH daemon to come up in %s..." % targetIP)
             time.sleep(5)
 
@@ -271,20 +271,20 @@ def connectNodes(node1, node2):
 
     # STUDENTS FILL THIS PART OUT
     vni = generateVNI()
-    runCommandOverSSH(node1SSH, 'sudo ovs-vsctl add-port br1 %s 
-            -- set interface %s type=vxlan options:remote_ip=%s options:key=%s' 
+    runCommandOverSSH(node1SSH, 'sudo ovs-vsctl add-port br1 %s\
+            -- set interface %s type=vxlan options:remote_ip=%s options:key=%s'
             % (
-                node1.name + '-' + node2.name, 
-                node1.name + '-' + node2.name, 
-                node2IP, 
+                node1.name + '-' + node2.name,
+                node1.name + '-' + node2.name,
+                node2IP,
                 vni
                 ))
-    runCommandOverSSH(node2SSH, 'sudo ovs-vsctl add-port br1 %s 
-            -- set interface %s type=vxlan options:remote_ip=%s options:key=%s' 
+    runCommandOverSSH(node2SSH, 'sudo ovs-vsctl add-port br1 %s\
+            -- set interface %s type=vxlan options:remote_ip=%s options:key=%s'
             % (
-                node2.name + '-' + node1.name, 
-                node2.name + '-' + node1.name, 
-                node1IP, 
+                node2.name + '-' + node1.name,
+                node2.name + '-' + node1.name,
+                node1IP,
                 vni))
 
 def getVM(vmName):
