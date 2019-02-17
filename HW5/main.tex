@@ -44,8 +44,8 @@ In order to deploy the mentioned topology I used the general structure like belo
 	\item Checking for existence of a previous switches / hosts
 	\item If hosts / switches doesn't exist boot the VM 
 	\item Creating OVS bridge named \textit{br1} in each switch / host
-	\item Going through each of the connections between vms and switches and checking weather connection existed before
-	\item Creating new vxlan tunnel if the connection didn't exist
+	\item Going through each of the connections between VMs and switches and checking whether connection existed before
+	\item Creating new VXLAN tunnel if the connection didn't exist
 \end{enumerate}
 
 
@@ -59,7 +59,7 @@ def getVM(vmName):
     return server
 \end{minted}
 
-This function receives \textit{vmName} as input and returns the vm object returned by nova client. \\
+This function receives \textit{vmName} as input and returns the VM object returned by nova client. \\
 \begin{center}
 	\line(1,0){250}
 \end{center}
@@ -112,7 +112,7 @@ def bootVM(vmName):
     return server
 \end{minted}
 
-This function creates a new vm prefixed using the username. Then, it retrieves the flavor, network and image objects from using the nova client and finally it creates the server using \textit{nova.servers.create}. In the end, function waits until the vm becomes active and then returns.
+This function creates a new VM prefixed using the username. Then, it retrieves the flavor, network and image objects from using the nova client and finally it creates the server using \textit{nova.servers.create}. In the end, function waits until the VM becomes active and then returns.
 
 \begin{center}
 	\line(1,0){250}
@@ -136,7 +136,7 @@ def setOverlayInterface(hostVMObj, hostOverlayIP):
         runCommandOverSSH(hostSSH, 'sudo ifconfig br1-internal %s/24 mtu 1450 up' % hostOverlayIP)
 \end{minted}
 
-This function simply adds an ovs bridge. If the \textit{hostOverlayIP} parameter is not equal to \textit{None}, it will also add one port to this bridge and configure its mtu as mentioned in the assignment.
+This function simply adds an OVS bridge. If the \textit{hostOverlayIP} parameter is not equal to \textit{None}, it will also add one port to this bridge and configure its MTU as mentioned in the assignment.
 
 \begin{center}
 	\line(1,0){250}
@@ -237,7 +237,7 @@ def deployOverlay():
             connectNodes(switchVMObj, endpointVMObj)
 \end{minted}
 
-This function first checks whether the switch/host was previously created or not. If it wasn't previously created, it creates a new VM with appropriate overlay IP addresses. Then, checks wheather the connection exists or not (in order to avoid loops). If connection didn't existed before, it creates a new connection using \textit{connectNodes} function and stores the connection in order to avoid creating loops in the future.
+This function first checks whether the switch/host was previously created or not. If it wasn't previously created, it creates a new VM with appropriate overlay IP addresses. Then, checks whether the connection exists or not (in order to avoid loops). If connection didn't existed before, it creates a new connection using \textit{connectNodes} function and stores the connection in order to avoid creating loops in the future.
 
 \begin{center}
 	\line(1,0){250}
