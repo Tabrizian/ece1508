@@ -259,7 +259,7 @@ def deployOverlay():
             connectNodes(switchVMObj, endpointVMObj)
 \end{minted}
 
-This function first checks whether the switch/host was previously created or not. If it wasn't previously created, it creates a new VM with appropriate overlay IP addresses. Then, checks whether the connection exists or not (in order to avoid loops). If connection didn't existed before, it creates a new connection using \textit{connectNodes} function and stores the connection in order to avoid creating loops in the future. Also, after the creation of each each invokes the \textit{setController} to make sure that the controller IP address is correct.
+This function first checks whether the switch/host was previously created or not. If it wasn't previously created, it creates a new VM with appropriate overlay IP addresses. Then, checks whether the connection exists or not (in order to avoid loops). If connection didn't existed before, it creates a new connection using \textit{connectNodes} function and stores the connection in order to avoid creating loops in the future. Also, after the creation of each switch invokes the \textit{setController} to make sure that the controller IP address is correct.
 
 \begin{center}
 	\line(1,0){250}
