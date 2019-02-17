@@ -165,11 +165,14 @@ def setController(switchVMObj, ctrlEndpoint):
     # Ensure OVS daemon is up and running
     waitUntilOVSActive(switchSSH)
 
-    ovsName = "%s-br" % switchVMObj.name
+    # ovsName = "%s-br" % switchVMObj.name
+    ovsName = 'br1'
     cmd = "sudo ovs-vsctl set-controller %s tcp:%s" % (ovsName, ctrlEndpoint)
     runCommandOverSSH(switchSSH, cmd)
 
-
+# Returns a nova client created using appropriate credentials
+# Returns:
+#   - A novaClient with credentials filled in
 def getNovaClient():
     nova = novaClient.Client(
         overlay_config.username,
