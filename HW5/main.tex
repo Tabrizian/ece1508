@@ -196,48 +196,70 @@ def deployOverlay():
     for switch in overlay_config.topology.keys():
         switchVMObj = None
 
-        if switch in createdSwitches:
+        if switch in createdSwitches: # if switch already exsits don't create it
             switchVMObj = createdSwitches[switch]
         else:
+            # First boot the VM
             switchVMObj = bootVM(switch)
+            # Add to list of new VMs
             createdSwitches[switch] = switchVMObj
+            # Create the bridge without IP
             setOverlayInterface(switchVMObj, None)
+            # Set the bridge controller to ryu
+            setController(switchVMObj, overlay_config.contr_addr)
 
+        # Iterate on the list of endpoints connected to the switch
         for endpoint in overlay_config.topology[switch]:
             endpointVMObj = None
+            # Is it a switch ?
             if type(endpoint) is str:
+                # Check whether connection exist or not
                 if endpoint + '-' + switch in createdConnections:
                     continue
                 elif switch + '-' + endpoint in createdConnections:
                     continue
                 else:
+                    # If doesn't exist append to list of created connections
                     createdConnections.append(switch + '-' + endpoint)
 
+                # Check whether switch is already created
                 if endpoint in createdSwitches:
                     endpointVMObj = createdSwitches[endpoint]
                 else:
-                   endpointVMObj = bootVM(endpoint)
-                   createdSwitches[endpoint] = endpointVMObj
-                   setOverlayInterface(endpointVMObj, None)
+                    # Create switch if it doesn't exist
+                    endpointVMObj = bootVM(endpoint)
+                    # Append to the list of already created switches
+                    createdSwitches[endpoint] = endpointVMObj
+                    # Create the bridge without IP
+                    setOverlayInterface(endpointVMObj, None)
+                    # Set the bridge controller to ryu
+                    setController(endpointVMObj, overlay_config.contr_addr)
 
+            # Is it a host ?
             elif type(endpoint) is tuple:
+                # Check whether connection exist or not
                 if endpoint[0] + '-' + switch in createdConnections:
                     continue
                 elif switch + '-' + endpoint[0] in createdConnections:
                     continue
                 else:
+                    # If doesn't exist append to list of created connections
                     createdConnections.append(switch + '-' + endpoint[0])
+                # Check whether host is already created
                 if endpoint in createdHosts:
                     endpointVMObj = createdHosts[endpoint[0]]
                 else:
-                   endpointVMObj = bootVM(endpoint[0])
-                   createdHosts[endpoint] = endpointVMObj
-                   setOverlayInterface(endpointVMObj, endpoint[1])
+                    # Create host if it doesn't exist
+                    endpointVMObj = bootVM(endpoint[0])
+                    # Append to the list of already created hosts
+                    createdHosts[endpoint] = endpointVMObj
+                    # Create the bridge and create an internal port
+                    setOverlayInterface(endpointVMObj, endpoint[1])
 
             connectNodes(switchVMObj, endpointVMObj)
 \end{minted}
 
-This function first checks whether the switch/host was previously created or not. If it wasn't previously created, it creates a new VM with appropriate overlay IP addresses. Then, checks whether the connection exists or not (in order to avoid loops). If connection didn't existed before, it creates a new connection using \textit{connectNodes} function and stores the connection in order to avoid creating loops in the future.
+This function first checks whether the switch/host was previously created or not. If it wasn't previously created, it creates a new VM with appropriate overlay IP addresses. Then, checks whether the connection exists or not (in order to avoid loops). If connection didn't existed before, it creates a new connection using \textit{connectNodes} function and stores the connection in order to avoid creating loops in the future. Also, after the creation of each each invokes the \textit{setController} to make sure that the controller IP address is correct.
 
 \begin{center}
 	\line(1,0){250}
