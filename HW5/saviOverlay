@@ -166,6 +166,7 @@ def setController(switchVMObj, ctrlEndpoint):
     waitUntilOVSActive(switchSSH)
 
     # ovsName = "%s-br" % switchVMObj.name
+    # In my case all of the bridges are named br1
     ovsName = 'br1'
     cmd = "sudo ovs-vsctl set-controller %s tcp:%s" % (ovsName, ctrlEndpoint)
     runCommandOverSSH(switchSSH, cmd)
@@ -207,7 +208,9 @@ def bootVM(vmName):
     nova = getNovaClient()
     net_name = overlay_config.tenant_name + '-net'
     net = nova.networks.find(label=net_name)
+    # Get flavor
     flavor = nova.flavors.find(name=overlay_config.flavor)
+    # Get image
     image = nova.images.find(name=overlay_config.image)
     server = nova.servers.create(
         vmName,
@@ -218,6 +221,7 @@ def bootVM(vmName):
         nics=[{'net-id': net.id}]
         )
 
+    # Wait until VM becomes active
     waitUntilVMActive(server)
 
     return server
@@ -244,7 +248,10 @@ def setOverlayInterface(hostVMObj, hostOverlayIP):
     waitUntilOVSActive(hostSSH)
 
     # STUDENTS FILL THIS PART OUT
+    # Add br1
     runCommandOverSSH(hostSSH, 'sudo ovs-vsctl --may-exist add-br br1')
+
+    # If hostOverlayIP is specified add an interal port (this applies to hosts)
     if hostOverlayIP is not None:
         runCommandOverSSH(hostSSH, 'sudo ovs-vsctl --may-exist add-port \
                 br1 br1-internal -- set interface br1-internal type=internal')
@@ -273,7 +280,11 @@ def connectNodes(node1, node2):
     waitUntilOVSActive(node2SSH)
 
     # STUDENTS FILL THIS PART OUT
+
+    # Get a unique VNI
     vni = generateVNI()
+
+    # Add VXLAN port for src VM
     runCommandOverSSH(node1SSH, 'sudo ovs-vsctl add-port br1 %s\
             -- set interface %s type=vxlan options:remote_ip=%s options:key=%s'
             % (
@@ -282,6 +293,7 @@ def connectNodes(node1, node2):
                 node2IP,
                 vni
                 ))
+    # Add VXLAN port for dest VM
     runCommandOverSSH(node2SSH, 'sudo ovs-vsctl add-port br1 %s\
             -- set interface %s type=vxlan options:remote_ip=%s options:key=%s'
             % (
@@ -290,6 +302,11 @@ def connectNodes(node1, node2):
                 node1IP,
                 vni))
 
+# Get a VM object only using its name
+# Input:
+#   - vmName: VM name witout prefix (e.g. h1)
+# Returns:
+#   The VM object returned by Nova
 def getVM(vmName):
     nova = getNovaClient()
     vmName = overlay_config.username + '-' + vmName
@@ -318,45 +335,65 @@ def deployOverlay():
     for switch in overlay_config.topology.keys():
         switchVMObj = None
 
-        if switch in createdSwitches:
+        if switch in createdSwitches: # if switch already exsits don't create it
             switchVMObj = createdSwitches[switch]
         else:
+            # First boot the VM
             switchVMObj = bootVM(switch)
+            # Add to list of new VMs
             createdSwitches[switch] = switchVMObj
+            # Create the bridge without IP
             setOverlayInterface(switchVMObj, None)
+            # Set the bridge controller to ryu
             setController(switchVMObj, overlay_config.contr_addr)
 
+        # Iterate on the list of endpoints connected to the switch
         for endpoint in overlay_config.topology[switch]:
             endpointVMObj = None
+            # Is it a switch ?
             if type(endpoint) is str:
+                # Check whether connection exist or not
                 if endpoint + '-' + switch in createdConnections:
                     continue
                 elif switch + '-' + endpoint in createdConnections:
                     continue
                 else:
+                    # If doesn't exist append to list of created connections
                     createdConnections.append(switch + '-' + endpoint)
 
+                # Check whether switch is already created
                 if endpoint in createdSwitches:
                     endpointVMObj = createdSwitches[endpoint]
                 else:
-                   endpointVMObj = bootVM(endpoint)
-                   createdSwitches[endpoint] = endpointVMObj
-                   setOverlayInterface(endpointVMObj, None)
-                   setController(endpointVMObj, overlay_config.contr_addr)
+                    # Create switch if it doesn't exist
+                    endpointVMObj = bootVM(endpoint)
+                    # Append to the list of already created switches
+                    createdSwitches[endpoint] = endpointVMObj
+                    # Create the bridge without IP
+                    setOverlayInterface(endpointVMObj, None)
+                    # Set the bridge controller to ryu
+                    setController(endpointVMObj, overlay_config.contr_addr)
 
+            # Is it a host ?
             elif type(endpoint) is tuple:
+                # Check whether connection exist or not
                 if endpoint[0] + '-' + switch in createdConnections:
                     continue
                 elif switch + '-' + endpoint[0] in createdConnections:
                     continue
                 else:
+                    # If doesn't exist append to list of created connections
                     createdConnections.append(switch + '-' + endpoint[0])
+                # Check whether host is already created
                 if endpoint in createdHosts:
                     endpointVMObj = createdHosts[endpoint[0]]
                 else:
-                   endpointVMObj = bootVM(endpoint[0])
-                   createdHosts[endpoint] = endpointVMObj
-                   setOverlayInterface(endpointVMObj, endpoint[1])
+                    # Create host if it doesn't exist
+                    endpointVMObj = bootVM(endpoint[0])
+                    # Append to the list of already created hosts
+                    createdHosts[endpoint] = endpointVMObj
+                    # Create the bridge and create an internal port
+                    setOverlayInterface(endpointVMObj, endpoint[1])
 
             connectNodes(switchVMObj, endpointVMObj)
 
@@ -378,6 +415,7 @@ def listOverlay():
 
     nova = getNovaClient()
     for server in nova.servers.list():
+        # If its name starts with 'username-'
         if server.name.startswith(overlay_config.username + '-'):
             vmIP = server.networks.get(networkName)[0]
             print server.name + ':' + ' ' + server.id + ' (' + vmIP + ')'
@@ -392,7 +430,8 @@ def cleanupOverlay():
     # STUDENTS FILL THIS PART OUT
     nova = getNovaClient()
     for server in nova.servers.list():
-        if server.name.split('-')[0] == overlay_config.username:
+        # If its name starts with 'username-'
+        if server.name.startswith(overlay_config.username + '-'):
             print server.name + ' deleted!'
             server.delete()
 
