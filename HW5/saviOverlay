@@ -243,15 +243,6 @@ def setOverlayInterface(hostVMObj, hostOverlayIP):
         runCommandOverSSH(hostSSH, 'sudo ovs-vsctl --may-exist add-port br1 br1-internal -- set interface br1-internal type=internal')
         runCommandOverSSH(hostSSH, 'sudo ifconfig br1-internal %s/24 mtu 1450 up' % hostOverlayIP)
 
-
-def getVMSession(vmObject):
-    networkName = overlay_config.tenant_name + '-net'
-
-    nodeIP = vmObject.networks.get(networkName)[0]
-    nodeSSH = getSSHSession(nodeIP, 'ubuntu', 'savi')
-    return nodeSSH
-
-
 # Connects two nodes as part of an overlay.
 # Nodes can be either a host or a switch object, but generally at least
 # one of them should be a switch.
@@ -283,8 +274,6 @@ def getVM(vmName):
     vmName = overlay_config.username + '-' + vmName
     server = nova.servers.find(name=vmName)
     return server
-
-
 
 
 ################################################################################
@@ -362,6 +351,13 @@ def listOverlay():
     print "In listOverlay()"
 
     # STUDENTS FILL THIS PART OUT
+    networkName = overlay_config.tenant_name + '-net'
+
+    nova = getNovaClient()
+    for server in nova.servers.list():
+        if server.name.startswith(overlay_config.username + '-'):
+            vmIP = server.networks.get(networkName)[0]
+            print server.name + ':' + ' ' + server.id + ' (' + vmIP + ')'
 
 
 # Just cleans up any VM that starts with your username and a dash
@@ -387,7 +383,7 @@ def printHelp():
     return
 
 if __name__ == "__main__":
-    SUBCOMMANDS = ('help', 'deploy', 'list', 'cleanup', 'test')
+    SUBCOMMANDS = ('help', 'deploy', 'list', 'cleanup')
 
     if len(sys.argv) > 2:
         print "ERROR: Incorrect # of args"
@@ -415,8 +411,6 @@ if __name__ == "__main__":
             listOverlay()
         elif sys.argv[1] == "cleanup":
             cleanupOverlay()
-        elif sys.argv[1] == "test":
-            print 'good'
 
 
     sys.exit();
