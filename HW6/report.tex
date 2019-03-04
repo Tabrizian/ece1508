@@ -38,4 +38,40 @@ ECE1508}
 
 \maketitle
 
+\begin{minted}{text}
+ubuntu@netsoft17-h1:~$ ping -c 4 192.168.200.11
+PING 192.168.200.11 (192.168.200.11) 56(84) bytes of data.
+64 bytes from 192.168.200.11: icmp_seq=1 ttl=64 time=512 ms
+64 bytes from 192.168.200.11: icmp_seq=2 ttl=64 time=4.25 ms
+64 bytes from 192.168.200.11: icmp_seq=3 ttl=64 time=4.80 ms
+64 bytes from 192.168.200.11: icmp_seq=4 ttl=64 time=5.05 ms
+
+--- 192.168.200.11 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3004ms
+rtt min/avg/max/mdev = 4.251/131.731/512.819/220.021 ms
+\end{minted}
+
+\begin{minted}{text}
+ubuntu@netsoft17-h1:~$ ping -c 4 192.168.200.12
+PING 192.168.200.12 (192.168.200.12) 56(84) bytes of data.
+64 bytes from 192.168.200.12: icmp_seq=1 ttl=64 time=12.2 ms
+64 bytes from 192.168.200.12: icmp_seq=2 ttl=64 time=4.64 ms
+64 bytes from 192.168.200.12: icmp_seq=3 ttl=64 time=4.46 ms
+64 bytes from 192.168.200.12: icmp_seq=4 ttl=64 time=4.71 ms
+
+--- 192.168.200.12 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3005ms
+rtt min/avg/max/mdev = 4.469/6.509/12.217/3.297 ms
+\end{minted}
+
+\begin{minted}{text}
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+sudo iptables -P FORWARD ACCEPT
+
+Chain POSTROUTING (policy ACCEPT)
+target     prot opt source               destination
+MASQUERADE  all  --  172.17.0.0/16        anywhere
+MASQUERADE  all  --  anywhere             anywhere
+\end{minted}
+
 \end{document}
