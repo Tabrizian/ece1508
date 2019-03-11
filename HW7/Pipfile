@@ -9,6 +9,7 @@ verify_ssl = true
 requests = "*"
 pymongo = "*"
 matplotlib = "*"
+paho-mqtt = "*"
 
 [requires]
 python_version = "3.6"
