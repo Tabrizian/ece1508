@@ -60,8 +60,6 @@ def fetch_and_publish():
         print('Published %s city to %s topic' % (city, topic))
 
 if __name__ == '__main__':
-
-
     while True:
         client = mqtt.Client()
         client.connect(BROKER_ADDRESS, BROKER_PORT)
@@ -71,5 +69,4 @@ if __name__ == '__main__':
         dt = datetime.datetime.now() + timedelta(hours=1)
         while datetime.datetime.now() < dt:
             time.sleep(2)
-
 
