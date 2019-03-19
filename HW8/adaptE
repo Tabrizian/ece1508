@@ -1,0 +1,161 @@
+#!/bin/bash
+
+THRESH1=95 
+THRESH2=80
+THRESH3=70
+THRESH4=50
+THRESH5=25
+THRESH6=15
+THRESH7=0
+ACTIVE=0
+
+timestamp() {
+  date +"%T"
+}
+
+check_utilization() {
+  states=''
+  utils=$@
+  for util in $utils 
+  do 
+    util=`echo $util | sed 's/\...//'`
+    if [ $util -eq 0 ]
+    then
+	util=-100
+    fi
+
+    if [ $util -ge $THRESH1 ]
+    then 
+      states=$states' '0
+    elif [ $util -ge $THRESH2 ]
+    then
+      states=$states' '1
+    elif [ $util -ge $THRESH3 ]
+    then
+      states=$states' '2
+    elif [ $util -ge $THRESH4 ]
+    then
+      states=$states' '3
+    elif [ $util -ge $THRESH5 ]
+    then
+      states=$states' '4
+    elif [ $util -ge $THRESH6 ]
+    then
+      states=$states' '5
+    elif [ $util -ge $THRESH7 ]
+    then
+      states=$states' '6
+    else
+      states=$states' '1000
+    fi
+  done
+  echo $states
+}
+
+number_of_dangered_cpu() {
+  policies=$@
+  counter=0
+  for policy in $policies
+  do
+      if [ $policy -eq 6 ]
+      then
+        counter=$((counter+1))
+      fi
+  done
+  echo $counter
+}
+
+number_of_active_cpu() {
+  policies=$@
+  counter=0
+  for policy in $policies
+  do
+      if [ $policy -eq 1000 ]
+      then
+        counter=$((counter+1))
+      fi
+  done
+  echo $counter
+}
+
+turn_off_cpu() {
+  cpu=$1
+  sudo sh -c "echo -n 0 > /sys/devices/system/cpu/cpu"$cpu"/online"
+}
+
+turn_on_cpu() {
+  cpu=$1
+  sudo sh -c "echo -n 1 > /sys/devices/system/cpu/cpu"$cpu"/online"
+}
+
+
+set_frequency() {
+  cpu=$1
+  frequency=$2
+  
+  if [ $frequency -eq 5 ]
+  then
+    frequency=1996000
+  elif [ $frequency -eq 4 ]
+  then
+    frequency=1995000
+  elif [ $frequency -eq 3 ]
+  then
+    frequency=1862000
+  elif [ $frequency -eq 2 ]
+  then
+    frequency=1729000
+  elif [ $frequency -eq 1 ]
+  then
+    frequency=1596000
+  elif [ $frequency -eq 0 ]
+  then
+    frequency=-1
+    turn_off_cpu $cpu
+    echo "Turned off "$cpu
+  fi
+  echo `timestamp`: "setting policy "$frequency "for CPU "$cpu
+  filename="/sys/devices/system/cpu/cpu"$cpu
+  if [ $frequency -ne 1000 ]
+  then
+    if [ -e $filename ]
+    then
+      sudo sh -c "echo -n \"userspace\" > /sys/devices/system/cpu/cpu"$cpu"/cpufreq/scaling_governor"
+      sudo sh -c "echo -n "$frequency" > /sys/devices/system/cpu/cpu"$cpu"/cpufreq/scaling_setspeed"
+    else
+      echo "CPU "$cpu "is turned off!"
+    fi
+  else
+    if [ $num1 -le $num2 ]
+    then
+      if [ $ACTIVE -ne 1 ]
+      then
+        turn_on_cpu $cpu
+        echo "Turned on "$cpu
+        ACTIVE=1
+      fi
+    fi
+  fi
+  
+}
+
+apply_policy() {
+  policies=$@
+  j=0
+  for policy in $policies
+  do
+    if [ $j -ne 0 ]
+    then
+      set_frequency $j $policy
+    fi
+    j=$((j+1))
+  done
+}
+
+cpu_utilization=`mpstat -P ALL | awk 'NR>4{print $13}'`
+echo $cpu_utilization
+policy=`check_utilization $cpu_utilization`
+num1=`number_of_active_cpu $policy`
+num2=`number_of_dangered_cpu $policy`
+echo $policy
+apply_policy $policy

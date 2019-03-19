@@ -1,0 +1,22 @@
+#!/bin/bash
+timestamp() {
+  date +"%T"
+}
+
+printINFO(){
+  echo $@ >> logs/arriveElogs
+}
+
+# Max number of VMs in each stack
+maxNumberVMs=8
+
+number=$(awk -v min=1 -v max=$maxNumberVMs 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
+awk -v number=$number '{sub(/count.*/, "count: "number)}1' template.yaml > /tmp/template.yaml
+stackName="my-stack-"$1
+tmp=$(timestamp)": Trying to create stack \""$stackName"\" with "$number" VMs..."
+echo $tmp
+printINFO $tmp
+openstack stack create $stackName -t /tmp/template.yaml --insecure
+
+
+

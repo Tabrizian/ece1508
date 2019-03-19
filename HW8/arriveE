@@ -1,0 +1,25 @@
+#!/bin/bash
+
+timestamp() {
+  date +"%T"
+}
+
+# Max execution duration this file is run
+maxTime=30
+
+# Lambda, which indicates the time interval which createE is run
+period=`awk -v min=1 -v max=5 'BEGIN{srand(); print int(min+rand()*(max-min+1))}'`
+
+# Max iteration is calculated based on the Lambda and max execution duration
+maxIteration=$(( maxTime/period ))
+sleepTime=$(( 60*period ))
+
+echo $(timestamp)": This script is running for: "$maxTime" (min) and calls createE every: "$period" (min) for a total number of "$maxIteration"."
+
+for i in $(seq 1 $maxIteration)
+do
+  echo $(timestamp)": Stack "$i" is creating... "
+  /bin/bash createE $i
+  echo $(timestamp)": Waiting for "$period" min ... "
+  sleep $sleepTime
+done 
