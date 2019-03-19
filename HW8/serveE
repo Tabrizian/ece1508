@@ -1,0 +1,36 @@
+#!/bin/bash
+
+timestamp() {
+  date +"%T"
+}
+
+getToken(){
+  reqCred='{"auth":{"identity":{"methods":["password"],"password":{"user":{"name":"admin","domain":{"id":"default"},"password":"sde*5554"}}},"scope":{"project":{"name":"admin","domain":{"id":"default"}}}}}'
+
+ token=$(curl -s -i -H "Content-Type: application/json"  -d $reqCred https://172.29.1.21:5000/v3/auth/tokens | grep X-Subject-Token | awk '{print $2}')
+ echo ${token//$'\015'}
+}
+
+period=`awk -v min=1 -v max=7 'BEGIN{srand(); print int(min+rand()*(max-min+1))}'`
+echo $(timestamp)": servE checks for VMs every "$period" min ..."
+check=1
+token=$(getToken)
+
+while [ $check -eq 1 ]
+do
+  if pgrep -x "arriveE" > /dev/null
+  then
+    echo $(timestamp)": arriveE is still running, check for existing stacks..." 
+    stackList=$(curl -s -X GET -H "X-Auth-Token:$token" -H "Content-Type: application/json" https://172.29.1.21:8004/v1/db90f2ee786e4fc89eef51c9c9e8be88/stacks | jq -r '.stacks[].stack_name')
+    for stack in $stackList
+    do
+      echo $(timestamp)": Stacks \""$stack"\" is found! Try to delete it..."
+      openstack stack delete $stack -y --insecure
+    done
+    echo $(timestamp)": Waiting for "$period" min ..."
+    sleep $(( period*60 ))
+  else
+    echo $(timestamp)": arriveE is not running, exiting..." 
+    check=0
+  fi
+done

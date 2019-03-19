@@ -1,0 +1,37 @@
+#!/bin/bash
+system_vars=`sudo eri-ipmitool rns 0 4 5 68 69 | awk -F '|' 'NR>3{print $3}'`
+system_vars=($system_vars)
+
+degree=${system_vars[0]}
+current1=${system_vars[1]}
+current2=${system_vars[2]}
+voltage1=${system_vars[3]}
+voltage2=${system_vars[4]}
+power1=`awk -v val1=$current1 -v val2=$voltage1 'BEGIN{print val1*val2}'`
+power2=`awk -v val1=$current2 -v val2=$voltage2 'BEGIN{print val1*val2}'`
+total_power=`awk -v val1=$power1 -v val2=$power2 'BEGIN{print val1+val2}'`
+
+timestamp=`date -R`
+cpu_frequencies=`sudo cpufreq-info  | grep "current CPU frequency is" | awk '{print $5}'`
+cpu_frequencies=($cpu_frequencies)
+cpu_utilization=`mpstat -P ALL | awk 'NR>4{print $13}'`
+cpu_utilization=($cpu_utilization)
+cpu_names=`sudo cpufreq-info  | awk 'BEGIN{RS="analyzing CPU";ORS="\n"} /CPUs which need to have their frequency coordinated by software/{print $1}' |  sed 's/://g'`
+cpu_names=($cpu_names)
+
+record=$timestamp','$degree','$power1','$power2','$total_power
+j=0
+for i in {0..11}
+do
+  if [ $i -eq ${cpu_names[$j]} ]
+  then
+    cpu_usage=`awk -v val=${cpu_utilization[$i]} 'BEGIN{print 100-val}'`
+    record=$record','$cpu_usage','${cpu_frequencies[$j]}
+    j=$((j+1))
+  else
+    record=$record','0.00','0.00
+  fi
+done
+
+echo "$record" >> "output.csv"
+echo "Result was saved"
