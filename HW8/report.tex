@@ -1,0 +1,98 @@
+% --------------------------------------------------------------
+% This is all preamble stuff that you don't have to worry about.
+% Head down to where it says "Start here"
+% --------------------------------------------------------------
+ 
+\documentclass[12pt]{article}
+ 
+\usepackage[margin=1in]{geometry} \usepackage{amsmath,amsthm,amssymb}
+\usepackage{minted}
+\usepackage{graphicx}
+\graphicspath{ {screenshots/} }
+
+
+ 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+
+\newenvironment{solution}{\begin{proof}[Solution]}{\end{proof}}
+ 
+\begin{document}
+ 
+% --------------------------------------------------------------
+%                         Start here
+% --------------------------------------------------------------
+ 
+\title{Homework 8}
+\author{Iman Tabrizian\\ %replace with your name
+	Ehsan Etesami\\
+	Pooyan Habibi
+ECE1508}
+
+\maketitle
+
+\vspace{5mm} 
+\textbf{Part 6}
+
+\vspace{2mm} 
+
+\vspace{5mm} 
+\textbf{Part a}
+
+\vspace{2mm} 
+
+\vspace{5mm} 
+\textbf{Part b}
+
+\vspace{2mm} 
+
+
+\vspace{5mm} 
+\textbf{Part c}
+
+\vspace{2mm} 
+
+\vspace{5mm} 
+\textbf{Part d}
+
+\vspace{2mm} 
+
+In our energy adaption strategy we divided the CPU usage to intervals and based
+on the interval which CPU usage is inside we will either decrease or increase
+CPU frequency.
+
+If the usage is very low, then we will turn off that core to save more energy.
+We run the adaptation algorithm every 15 seconds and change the CPU frequencies
+accordingly.
+
+If the usage is very high and we have a CPU turned off, then we will turn on
+some CPUs to increase the performance.
+
+\vspace{5mm} 
+\textbf{Part e}
+
+\vspace{2mm} 
+
+You can see the energy saving in the chart compared to the one without energy saving.
+
+
+\vspace{5mm} 
+\textbf{Part f}
+
+\vspace{2mm} 
+
+
+\end{document}
