@@ -3,8 +3,9 @@
 \usepackage{geometry}
 \usepackage{booktabs}
 \usepackage{multirow}
+\usepackage{graphicx}
 
-
+\graphicspath{{./screenshots/}}
 \geometry{margin=1in}
 
 
@@ -82,7 +83,9 @@ In the table below you can find the required parameters for different models.
 	\begin{tabular}{cccc}
 		\toprule
 		Number of Features & MLP Model time (sec) & SVR Model time (sec) & LSTM Model time (sec) \\
-		\midrule 2 & 0.0001 & 0.0000 & 0.0212 \\ \midrule
+		\midrule 
+		2 & 0.0001 & 0.0000 & 0.0212 \\ 
+		\midrule
 		3 & 0.0001 & 0.0000 & 0.0215 \\
 		\midrule
 		4 & 0.0001 & 0.0000 & 0.0214 \\
@@ -104,6 +107,7 @@ In the table below you can find the required parameters for different models.
 \end{table}
 
 \section{Tables for changing the number of training and test samples}
+
 \begin{table}[ht]
 	\centering
 	\begin{tabular}{p{2cm} p{2cm} p{2cm} p{2cm} p{2cm}}
@@ -122,15 +126,13 @@ In the table below you can find the required parameters for different models.
 		\midrule
 		1000 & 250 & 0.794297 & 0.63445184 & 0.42180600 \\
 		\midrule
-		1500 & 500 & 0.0002 & 0.0000 & 0.0211 \\
+		1500 & 500 & 0.96651828 & 0.5778822 & 0.4480015 \\
 		\midrule
-		1500 & 500 & 0.0002 & 0.0000 & 0.0211 \\
+		2000 & 300 & 1.03940 & 0.5402691 & 0.4445546 \\
 		\midrule
-		2000 & 300 & 0.0002 & 0.0000 & 0.0211 \\
+		2000 & 700 & 1.055143255 & 0.51158609 & 0.42775509 \\
 		\midrule
-		2000 & 700 & 0.0002 & 0.0000 & 0.0211 \\
-		\midrule
-		2000 & 1000 & 0.0002 & 0.0000 & 0.0211 \\
+		2000 & 1000 & 0.770215069 & 0.501095751 & 0.4175145106 \\
 		\bottomrule
 	\end{tabular}
 	\caption{Table of Results (error for residual time-series)}
@@ -144,7 +146,7 @@ In the table below you can find the required parameters for different models.
 		\midrule
 		100 & 100 & 0.2163283 & 0.1282866 & 0.0529728 \\
 		\midrule
-		300 & 100 & 0.16255385 & 0.0930699 & 0.0530593 \\
+		300 & 100 & 0.16255385 & 0.0930699 & 0.0530593 \\ 
 		\midrule
 		500 & 150 & 0.06214910 & 0.03006248 & 0.018388905 \\
 		\midrule
@@ -154,18 +156,15 @@ In the table below you can find the required parameters for different models.
 		\midrule
 		1000 & 250 & 0.02271976  & 0.018147593 & 0.012065161 \\
 		\midrule
-		1500 & 500 & 0.0002 & 0.0000 & 0.0211 \\
+		1500 & 500 & 0.0193519 & 0.01157052 & 0.00897001 \\
 		\midrule
-		1500 & 500 & 0.0002 & 0.0000 & 0.0211 \\
+		2000 & 300 & 0.02414774 & 0.012551687 & 0.01032801 \\
 		\midrule
-		2000 & 300 & 0.0002 & 0.0000 & 0.0211 \\
+		2000 & 700 & 0.01862322 &  0.00902947 & 0.007549857 \\
 		\midrule
-		2000 & 700 & 0.0002 & 0.0000 & 0.0211 \\
-		\midrule
-		2000 & 1000 & 0.0002 & 0.0000 & 0.0211 \\
+		2000 & 1000 & 0.0136075 & 0.00885297 & 0.00737632 \\
 		\bottomrule
-	\end{tabular}
-	\caption{Table of Results (error for original time-series)}
+	\end{tabular} \caption{Table of Results (error for original time-series)}
 \end{table}
 
 \begin{table}[ht]
@@ -186,15 +185,177 @@ In the table below you can find the required parameters for different models.
 		\midrule
 		1000 & 250 & 0.0893 & 0.0087 & 26.9709 \\
 		\midrule
-		1500 & 500 & 0.0002 & 0.0000 & 0.0211 \\
+		1500 & 500 & 0.1268 & 0.0145 & 38.3500 \\
 		\midrule
-		1500 & 500 & 0.0002 & 0.0000 & 0.0211 \\
+		2000 & 300 & 0.2651 & 0.0254 & 41.3337 \\
 		\midrule
-		2000 & 300 & 0.0002 & 0.0000 & 0.0211 \\
+		2000 & 700 & 0.3536 & 0.0244 & 47.1275 \\
 		\midrule
-		2000 & 700 & 0.0002 & 0.0000 & 0.0211 \\
+		2000 & 1000 & 0.1729 & 0.0246 & 49.6868 \\
+		\bottomrule
+	\end{tabular}
+	\caption{Table of Results (training time)}
+\end{table}
+
+\section{Changing parameters of the model}
+
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{p{2cm} p{2cm} p{2cm}}
+		\toprule
+		Kernel & SVR Model (NMSE) & SVR Model time (sec)  \\
 		\midrule
-		2000 & 1000 & 0.0002 & 0.0000 & 0.0211 \\
+		rbf & 0.010760054 & 0.0138 \\
+		\midrule
+		linear & 0.0102815448 & 0.0120 \\
+		\midrule
+		poly & 0.02005216 & 0.0155 \\
+		\midrule
+		sigmoid & 0.01157052 & 0.0141 \\
+		\bottomrule
+	\end{tabular}
+	\caption{Table of Results (training time)}
+\end{table}
+
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{p{2cm} p{2cm} p{2cm}}
+		\toprule
+		Number of Neurons & LSTM Model (NMSE) & LSTM Model time (sec)  \\
+		\midrule
+		100 & 0.0096152 & 5.1772 \\
+		\midrule
+		200 & 0.0090583 & 9.0979 \\
+		\midrule
+		300 & 0.0089833 & 13.7074 \\
+		\midrule
+		400 & 0.0089717 & 20.9778 \\
+		\midrule
+		500 & 0.0089696 & 26.7895 \\
+		\midrule
+		600 & 0.0089702 & 35.0587 \\
+		\midrule
+		700 & 0.0089704 & 49.3502 \\
+		\midrule
+		800 & 0.008971175 & 58.2411 \\
+		\midrule
+		900 & 0.008971458 & 69.0857 \\
+		\bottomrule
+	\end{tabular}
+	\caption{Table of Results (training time)}
+\end{table}
+\begin{enumerate}
+	\item SVR Model
+		The result of SVR model can be found in table 7
+	\item LSTM Model
+		The result of the LSTM model can be found in table 8
+\end{enumerate}
+
+\section{Find the optimal number of features}
+
+\begin{enumerate}
+	\item \textbf{DATA} and \textbf{SCALED} data are both LRD as you can 
+		see in the figure 1 but \textbf{DIFF} is SRD.
+	\item You can find the values below
+		\begin{enumerate}
+			\item 2
+			\item 3
+			\item 4
+			\item 5
+		\end{enumerate}
+\end{enumerate}
+\begin{figure}[h]
+	\centering
+	\includegraphics{acf-graph}
+	\caption{Graph of 3 versions of ACF values}
+\end{figure}
+
+\section{Find the optimal number of features}
+
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{p{2cm} p{2cm} p{2cm} p{2cm} p{2cm}}
+		\toprule
+		Number of Training Samples & Number of Test Samples & MLP Model (NMSE) & SVR Model (NMSE) & LSTM Model (NMSE) \\
+		\midrule
+		100 & 100 & 2.401500277 & 0.22102878144 & 0.4885491845 \\
+		\midrule
+		300 & 100 & 0.5204390496 & 0.141826776039 & 0.26777056924 \\
+		\midrule
+		500 & 150 & 0.271403002 & 0.043213428682 & 0.13468817742 \\
+		\midrule
+		700 & 100 & 0.898979734 & 0.1133347042 & 0.43853454954 \\
+		\midrule
+		800 & 250 & 0.204156149 & 0.029631597 & 0.0819993948 \\
+		\midrule
+		1000 & 250 & 0.23636296861 & 0.02857671576 & 0.0882958373 \\
+		\midrule
+		1500 & 500 & 0.073550607962 & 0.0170794986 & 0.066361683 \\
+		\midrule
+		2000 & 300 & 0.246820693984 & 0.0206132069035 & 0.070981274365 \\
+		\midrule
+		2000 & 700 & 0.12266811837 & 0.012627126431863 & 0.05428596822 \\
+		\midrule
+		2000 & 1000 & 0.09106933323 &  0.0123333436274 & 0.058587475145 \\
+		\bottomrule
+	\end{tabular}
+	\caption{Table of Results (error for residual time-series)}
+\end{table}
+
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{p{2cm} p{2cm} p{2cm} p{2cm} p{2cm}}
+		\toprule
+		Number of Training Samples & Number of Test Samples & MLP Model (NMSE) & SVR Model (NMSE) & LSTM Model (NMSE) \\
+		\midrule
+		100 & 100 & 2.4015002772 & 0.2210287814 & 0.48854920176 \\
+		\midrule
+		300 & 100 & 0.520439049690 & 0.14182677603 & 0.267770536093 \\ 
+		\midrule
+		500 & 150 & 0.271403002 & 0.0432134286 & 0.134688174981 \\
+		\midrule
+		700 & 100 & 0.8989797344 & 0.1133347042 & 0.4385345234 \\
+		\midrule
+		800 & 250 & 0.20415614959 & 0.02963159777 & 0.0819994032 \\
+		\midrule
+		1000 & 250 & 0.2363629686  & 0.028576715769 & 0.08829582833 \\
+		\midrule
+		1500 & 500 & 0.07355060796 & 0.0170794986 & 0.066361684994 \\
+		\midrule
+		2000 & 300 & 0.246820693984 & 0.0206132069035 & 0.0709812736 \\
+		\midrule
+		2000 & 700 & 0.122668118379 & 0.0126271264318 & 0.0542859687 \\
+		\midrule
+		2000 & 1000 & 0.091069333230 & 0.012333343627 & 0.05858747770 \\
+		\bottomrule
+	\end{tabular} \caption{Table of Results (error for original time-series)}
+\end{table}
+
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{p{2cm} p{2cm} p{2cm} p{2cm} p{2cm} p{2cm}}
+		\toprule
+		Number of Training Samples & Number of Test Samples & MLP Model time (sec) & SVR Model time (sec) & LSTM Model time (sec) \\
+		\midrule
+		100 & 100 & 0.0979 & 0.0044 & 10.9229 \\
+		\midrule
+		300 & 100 & 0.3224 & 0.0065 & 14.6880 \\
+		\midrule
+		500 & 150 & 0.1789 & 0.0091 & 17.0320 \\
+		\midrule
+		700 & 100 & 0.3709 & 0.0119 & 20.9940 \\
+		\midrule
+		800 & 250 & 0.7287 & 0.0150 & 23.7504 \\
+		\midrule
+		1000 & 250 & 0.3730 & 0.0163 & 28.4276 \\
+		\midrule
+		1500 & 500 & 0.5067 & 0.0320 & 38.3334 \\
+		\midrule
+		2000 & 300 & 0.3128 & 0.0655 & 44.8276 \\
+		\midrule
+		2000 & 700 & 0.7275 & 0.0653 & 46.7937 \\
+		\midrule
+		2000 & 1000 & 0.9362 & 0.0679 & 50.3620 \\
 		\bottomrule
 	\end{tabular}
 	\caption{Table of Results (training time)}
