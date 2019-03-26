@@ -21,7 +21,7 @@
 
 In the table below you can find the required parameters for different models.
 
-\begin{table}[h]
+\begin{table}[htb!]
 	\begin{tabular}{ccccccc}
 		\toprule
 		\multirow{2}{*}{Number of features} & \multicolumn{2}{c}{MLP Model} & \multicolumn{2}{c}{SVR Model} & \multicolumn{2}{c}{LSTM Model} \\ 
@@ -51,7 +51,7 @@ In the table below you can find the required parameters for different models.
 \end{table}
 
 
-\begin{table}[h]
+\begin{table}[htb!]
 	\begin{tabular}{ccccccc}
 		\toprule
 		\multirow{2}{*}{Number of features} & \multicolumn{2}{c}{MLP Model} & \multicolumn{2}{c}{SVR Model} & \multicolumn{2}{c}{LSTM Model} \\ 
@@ -79,28 +79,28 @@ In the table below you can find the required parameters for different models.
 	\caption{Table of Results (for original time-series)}
 \end{table}
 
-\begin{table}[ht]
+\begin{table}[htb!]
 	\begin{tabular}{cccc}
 		\toprule
 		Number of Features & MLP Model time (sec) & SVR Model time (sec) & LSTM Model time (sec) \\
 		\midrule 
-		2 & 0.0001 & 0.0000 & 0.0212 \\ 
+		2 & 0.1230 & 0.0163 & 32.4487 \\ 
 		\midrule
-		3 & 0.0001 & 0.0000 & 0.0215 \\
+		3 & 0.1482 & 0.0135 & 33.1699 \\
 		\midrule
-		4 & 0.0001 & 0.0000 & 0.0214 \\
+		4 & 0.1136 & 0.0134 & 37.8190 \\
 		\midrule
-		5 & 0.0002 & 0.0000 & 0.0211 \\
+		5 & 0.1621 & 0.0145 & 37.0023 \\
 		\midrule
-		6 & 0.0002 & 0.0000 & 0.0211 \\
+		6 & 0.1623 & 0.0143 & 33.7526 \\
 		\midrule
-		7 & 0.0001 & 0.0000 & 0.0197 \\
+		7 & 0.1253 & 0.0176 & 38.1295 \\
 		\midrule
-		8 & 0.0001 & 0.0000 & 0.0217 \\
+		8 & 0.0936 & 0.0139 & 34.2890 \\
 		\midrule
-		9 & 0.0002 & 0.0000 & 0.0203 \\
+		9 & 0.1786 & 0.0135 & 36.2493 \\
 		\midrule
-		10 & 0.0001 & 0.0000 & 0.0207 \\
+		10 & 0.0957 & 0.0142 & 36.1076 \\
 		\bottomrule
 	\end{tabular}
 	\caption{Table of Results (training time)}
@@ -108,7 +108,9 @@ In the table below you can find the required parameters for different models.
 
 \section{Tables for changing the number of training and test samples}
 
-\begin{table}[ht]
+You can find the results in table 4, 5 and 6.
+
+\begin{table}[htb!]
 	\centering
 	\begin{tabular}{p{2cm} p{2cm} p{2cm} p{2cm} p{2cm}}
 		\toprule
@@ -138,7 +140,7 @@ In the table below you can find the required parameters for different models.
 	\caption{Table of Results (error for residual time-series)}
 \end{table}
 
-\begin{table}[ht]
+\begin{table}[htb!]
 	\centering
 	\begin{tabular}{p{2cm} p{2cm} p{2cm} p{2cm} p{2cm}}
 		\toprule
@@ -167,7 +169,7 @@ In the table below you can find the required parameters for different models.
 	\end{tabular} \caption{Table of Results (error for original time-series)}
 \end{table}
 
-\begin{table}[ht]
+\begin{table}[htb!]
 	\centering
 	\begin{tabular}{p{2cm} p{2cm} p{2cm} p{2cm} p{2cm} p{2cm}}
 		\toprule
@@ -199,7 +201,7 @@ In the table below you can find the required parameters for different models.
 
 \section{Changing parameters of the model}
 
-\begin{table}[ht]
+\begin{table}[htb!]
 	\centering
 	\begin{tabular}{p{2cm} p{2cm} p{2cm}}
 		\toprule
@@ -217,7 +219,7 @@ In the table below you can find the required parameters for different models.
 	\caption{Table of Results (training time)}
 \end{table}
 
-\begin{table}[ht]
+\begin{table}[htb!]
 	\centering
 	\begin{tabular}{p{2cm} p{2cm} p{2cm}}
 		\toprule
@@ -244,18 +246,20 @@ In the table below you can find the required parameters for different models.
 	\end{tabular}
 	\caption{Table of Results (training time)}
 \end{table}
+
 \begin{enumerate}
-	\item SVR Model
+	\item SVR Model \\
 		The result of SVR model can be found in table 7
-	\item LSTM Model
+	\item LSTM Model \\
 		The result of the LSTM model can be found in table 8
 \end{enumerate}
+
+\pagebreak
 
 \section{Find the optimal number of features}
 
 \begin{enumerate}
-	\item \textbf{DATA} and \textbf{SCALED} data are both LRD as you can 
-		see in the figure 1 but \textbf{DIFF} is SRD.
+	\item \textbf{DATA} and \textbf{SCALED} data are both LRD as you can see in the figure 1 but \textbf{DIFF} is SRD.
 	\item You can find the values below
 		\begin{enumerate}
 			\item 2
@@ -264,45 +268,48 @@ In the table below you can find the required parameters for different models.
 			\item 5
 		\end{enumerate}
 \end{enumerate}
-\begin{figure}[h]
+
+\begin{figure}[htb!]
 	\centering
 	\includegraphics{acf-graph}
 	\caption{Graph of 3 versions of ACF values}
 \end{figure}
 
+\pagebreak
+
 \section{Find the optimal number of features}
 
-\begin{table}[ht]
+\begin{table}[htb!]
 	\centering
 	\begin{tabular}{p{2cm} p{2cm} p{2cm} p{2cm} p{2cm}}
 		\toprule
 		Number of Training Samples & Number of Test Samples & MLP Model (NMSE) & SVR Model (NMSE) & LSTM Model (NMSE) \\
 		\midrule
-		100 & 100 & 2.401500277 & 0.22102878144 & 0.4885491845 \\
+		100 & 100 & 2.401500277 & 0.221028781 & 0.48854918 \\
 		\midrule
-		300 & 100 & 0.5204390496 & 0.141826776039 & 0.26777056924 \\
+		300 & 100 & 0.52043904 & 0.1418267760 & 0.267770564 \\
 		\midrule
-		500 & 150 & 0.271403002 & 0.043213428682 & 0.13468817742 \\
+		500 & 150 & 0.271403002 & 0.0432134286 & 0.13468817 \\
 		\midrule
-		700 & 100 & 0.898979734 & 0.1133347042 & 0.43853454954 \\
+		700 & 100 & 0.898979734 & 0.1133347042 & 0.438534549 \\
 		\midrule
 		800 & 250 & 0.204156149 & 0.029631597 & 0.0819993948 \\
 		\midrule
-		1000 & 250 & 0.23636296861 & 0.02857671576 & 0.0882958373 \\
+		1000 & 250 & 0.23636296 & 0.02857671 & 0.08829583 \\
 		\midrule
-		1500 & 500 & 0.073550607962 & 0.0170794986 & 0.066361683 \\
+		1500 & 500 & 0.07355060 & 0.0170794 & 0.066361683 \\
 		\midrule
-		2000 & 300 & 0.246820693984 & 0.0206132069035 & 0.070981274365 \\
+		2000 & 300 & 0.24682069 & 0.020613206 & 0.0709812743 \\
 		\midrule
-		2000 & 700 & 0.12266811837 & 0.012627126431863 & 0.05428596822 \\
+		2000 & 700 & 0.12266811 & 0.01262712643 & 0.054285968 \\
 		\midrule
-		2000 & 1000 & 0.09106933323 &  0.0123333436274 & 0.058587475145 \\
+		2000 & 1000 & 0.0910693 &  0.0123333436 & 0.0585874751 \\
 		\bottomrule
 	\end{tabular}
-	\caption{Table of Results (error for residual time-series)}
+	\caption{Table of Results (error for scaled time-series)}
 \end{table}
 
-\begin{table}[ht]
+\begin{table}[htb!]
 	\centering
 	\begin{tabular}{p{2cm} p{2cm} p{2cm} p{2cm} p{2cm}}
 		\toprule
@@ -310,28 +317,28 @@ In the table below you can find the required parameters for different models.
 		\midrule
 		100 & 100 & 2.4015002772 & 0.2210287814 & 0.48854920176 \\
 		\midrule
-		300 & 100 & 0.520439049690 & 0.14182677603 & 0.267770536093 \\ 
+		300 & 100 & 0.520439049 & 0.14182677 & 0.267770536 \\ 
 		\midrule
-		500 & 150 & 0.271403002 & 0.0432134286 & 0.134688174981 \\
+		500 & 150 & 0.271403002 & 0.0432134286 & 0.1346881749 \\
 		\midrule
-		700 & 100 & 0.8989797344 & 0.1133347042 & 0.4385345234 \\
+		700 & 100 & 0.89897973 & 0.1133347042 & 0.43853452 \\
 		\midrule
-		800 & 250 & 0.20415614959 & 0.02963159777 & 0.0819994032 \\
+		800 & 250 & 0.204156149 & 0.02963159 & 0.08199940 \\
 		\midrule
-		1000 & 250 & 0.2363629686  & 0.028576715769 & 0.08829582833 \\
+		1000 & 250 & 0.23636296  & 0.028576715 & 0.08829582 \\
 		\midrule
-		1500 & 500 & 0.07355060796 & 0.0170794986 & 0.066361684994 \\
+		1500 & 500 & 0.07355060 & 0.0170794986 & 0.066361684 \\
 		\midrule
-		2000 & 300 & 0.246820693984 & 0.0206132069035 & 0.0709812736 \\
+		2000 & 300 & 0.24682069 & 0.0206132069 & 0.0709812 \\
 		\midrule
-		2000 & 700 & 0.122668118379 & 0.0126271264318 & 0.0542859687 \\
+		2000 & 700 & 0.12266811 & 0.0126271264 & 0.05428596 \\
 		\midrule
-		2000 & 1000 & 0.091069333230 & 0.012333343627 & 0.05858747770 \\
+		2000 & 1000 & 0.09106933 & 0.01233334 & 0.0585874 \\
 		\bottomrule
 	\end{tabular} \caption{Table of Results (error for original time-series)}
 \end{table}
 
-\begin{table}[ht]
+\begin{table}[htb!]
 	\centering
 	\begin{tabular}{p{2cm} p{2cm} p{2cm} p{2cm} p{2cm} p{2cm}}
 		\toprule
